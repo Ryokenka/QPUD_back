@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import com.takima.backskeleton.DTO.UserDto;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,16 +27,25 @@ public class UserService {
     }
 
     public void addUser(UserDto userDto) {
-        User user = UserMapper.fromDto(userDto);
+        User user = new User.Builder()
+                .username(userDto.getUsername())
+                .isAdmin(userDto.isAdmin())
+                .build();
         userDao.save(user);
     }
 
     public void updateUser(Long id, UserDto userDto) {
         User user = userDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setUsername(userDto.getUsername());
-        user.setAdmin(userDto.isAdmin());
-        userDao.save(user);
+
+        // Utilisation du Builder pour mettre à jour les informations de l'utilisateur
+        User updatedUser = new User.Builder()
+                .id(user.getId()) // Conserver l'ID existant
+                .username(userDto.getUsername())
+                .isAdmin(userDto.isAdmin())
+                .build();
+
+        userDao.save(updatedUser);
     }
 
     public void deleteUser(Long id) {
